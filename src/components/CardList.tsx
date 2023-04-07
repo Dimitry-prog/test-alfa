@@ -1,26 +1,19 @@
-import { FC, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks";
-import { getCards } from "../store/slices/cardSlice";
+import { FC } from "react";
 import Card from "./Card";
+import { ICard } from "../types/cardTypes";
 
 type CardListProps = {
-  isOpen: boolean;
-};
+  cards: ICard[];
+}
 
-const CardList: FC<CardListProps> = ({ isOpen }) => {
-  const cards = useAppSelector((state) => state.card.cards);
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(getCards());
-  }, []);
+const CardList: FC<CardListProps> = ({cards}) => {
 
   return (
     <div>
       <ul className="grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {cards.map((card) => (
           <li key={card.id}>
-            <Card card={card} />
+            <Card card={card}/>
           </li>
         ))}
       </ul>

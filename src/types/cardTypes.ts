@@ -2,6 +2,7 @@ export interface ICard {
   id: string;
   imgUrl: string;
   description: string;
+  isLike: boolean;
 }
 
 export interface ICardImageUrls {
