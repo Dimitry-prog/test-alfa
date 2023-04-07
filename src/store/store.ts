@@ -1,7 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
+import cardSlice from "./slices/cardSlice";
 
 const store = configureStore({
-  reducer: {},
+  reducer: {
+    card: cardSlice,
+  },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
