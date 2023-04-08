@@ -10,7 +10,6 @@ type CardState = {
   cards: ICard[];
   isLoading: boolean;
   error: string | null | unknown;
-  favourites: ICard[];
 };
 
 type KnownError = {
@@ -21,7 +20,6 @@ const initialState: CardState = {
   cards: JSON.parse(localStorage.getItem("cards") ?? "[]"),
   isLoading: false,
   error: null,
-  favourites: JSON.parse(localStorage.getItem("favourites") ?? "[]"),
 };
 
 export const getCards = createAsyncThunk<CardResponseServer[],
@@ -49,20 +47,15 @@ const cardSlice = createSlice({
     deleteCard: (state, action: PayloadAction<string>) => {
       state.cards = state.cards.filter((card) => card.id !== action.payload);
       localStorage.setItem("cards", JSON.stringify(state.cards));
-      const isExistCard = state.favourites.find(card => card.id === action.payload);
-      if (isExistCard) {
-        state.favourites = state.favourites.filter(card => card.id !== action.payload);
-        localStorage.setItem('favourites', JSON.stringify(state.favourites));
-      }
     },
-    toggleLikeCard: (state, action: PayloadAction<ICard>) => {
-      const isExistCard = state.favourites.find(card => card.id === action.payload.id);
-      if (isExistCard) {
-        state.favourites = state.favourites.filter(card => card.id !== action.payload.id);
-      } else {
-        state.favourites.push(action.payload);
-      }
-      localStorage.setItem('favourites', JSON.stringify(state.favourites));
+    toggleLikeCard: (state, action: PayloadAction<string>) => {
+      state.cards = state.cards.map(card => {
+        if (card.id === action.payload) {
+          card.isLike = !card.isLike;
+        }
+        return card;
+      });
+      localStorage.setItem("cards", JSON.stringify(state.cards));
     },
   },
   extraReducers: (builder: ActionReducerMapBuilder<CardState>) => {

@@ -1,20 +1,20 @@
-import { FC } from "react";
+import { FC, memo } from "react";
 import { ICard } from "../types/cardTypes";
 import { BsTrashFill } from "react-icons/bs";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-import { useDispatch } from "react-redux";
 import { deleteCard, toggleLikeCard } from "../store/slices/cardSlice";
-import { useAppSelector } from "../hooks";
+import { useAppDispatch, useAppSelector } from "../hooks";
 
 type CardProps = {
   card: ICard;
+  isRenderFavourites: boolean;
 };
 
-const Card: FC<CardProps> = ({card}) => {
+const Card: FC<CardProps> = ({card, isRenderFavourites}) => {
   const {id, imgUrl, description} = card;
-  const favourites = useAppSelector((state) => state.card.favourites);
-  const dispatch = useDispatch();
-  const isFavouriteCard = favourites.some((card) => card.id === id);
+  const cards = useAppSelector(state => state.card.cards);
+  const dispatch = useAppDispatch();
+  const isLikeCard = cards.find(card => card.id === id && card.isLike);
 
   return (
     <div
@@ -27,28 +27,39 @@ const Card: FC<CardProps> = ({card}) => {
       <p className="p-2 text-base font-medium text-center">{description}</p>
 
       <div
-        className="w-full p-2 absolute -bottom-24 left-0 flex items-center justify-between bg-slate-500/20 group-hover:-bottom-0 duration-500">
+        className={`w-full p-2 absolute -bottom-24 left-0 flex items-center bg-slate-500/20 group-hover:-bottom-0 duration-500 ${isRenderFavourites ? 'justify-center' : 'justify-between'}`}>
         <button
-          onClick={() => dispatch(toggleLikeCard(card))}
+          onClick={() => dispatch(toggleLikeCard(id))}
           type="button"
           aria-label="Toggle Like"
         >
-          {isFavouriteCard ? (
+          {isLikeCard ? (
             <AiFillHeart className="w-8 h-8 text-red-600"/>
           ) : (
             <AiOutlineHeart className="w-8 h-8"/>
           )}
         </button>
-        <button
+        {!isRenderFavourites && (<button
           onClick={() => dispatch(deleteCard(id))}
           type="button"
           aria-label="Delete"
         >
           <BsTrashFill className="w-8 h-8"/>
-        </button>
+        </button>)}
       </div>
     </div>
   );
 };
 
-export default Card;
+const areItemsEqual = ({card: prevCard, isRenderFavourites: prevFavRen}: CardProps, {
+  card: nextCard,
+  isRenderFavourites: nextFavRen
+}: CardProps) => {
+  return Object.keys(prevCard).every(key => {
+    return prevCard[key as keyof ICard] === nextCard[key as keyof ICard];
+  }) && prevFavRen === nextFavRen;
+};
+
+const MemoizedCard = memo<typeof Card>(Card, areItemsEqual);
+
+export default MemoizedCard;
